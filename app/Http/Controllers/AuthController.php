@@ -10,29 +10,32 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+public function register(Request $request)
     {
-        // Check if email already exists
-        $exists = User::where('email', $request->email)->exists();
-
-        if ($exists) {
-            return redirect('/register')->with('msg', 'User Already Exists');
-        }
+        // ✅ Validate input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed', // needs password_confirmation
+            'role' => 'required|in:admin,doctor,patient',
+        ]);
 
         try {
-            $user = User::create([
+            User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => bcrypt($request->password), // Hash password
+                'password' =>bcrypt($request->password),
                 'role' => $request->role,
             ]);
 
-            return redirect('/register')->with('msg', 'User Created Successfully...');
+            // ✅ Redirect back with success message
+            return redirect()->back()->with('msg', 'User Created Successfully...');
         } catch (\Exception $e) {
-            return redirect('/register')->with('msg', 'Something went wrong..! ' . $e->getMessage());
+            // Show exact error for debugging
+            return redirect()->back()->with('msg', 'Error: ' . $e->getMessage());
         }
+    
     }
-
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -147,7 +150,7 @@ class AuthController extends Controller
         $ticket->medicines = $request->medicines;
         $ticket->save();
 
-        return redirect()->back()->with('msg', 'Prescription submitted successfully!');
+        return redirect('/doctorlanding')->with('msg', 'Prescription submitted successfully!');
     }
     public function showPrescription($ticketId)
     {

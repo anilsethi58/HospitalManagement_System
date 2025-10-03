@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmailController;
 use App\Http\Middleware\CheckAuth;
 use App\Http\Middleware\Revalidate;
 use Illuminate\Support\Facades\Route;
@@ -109,3 +110,4 @@ Route::middleware([CheckAuth::class, Revalidate::class])->group(function () {
 Route::get('/download-prescription/{ticket_id}', [AuthController::class, 'downloadPDF'])->name('prescription.download');
 });
 
+Route::get('/send-email',[EmailController::class,"sendEmail"]);
